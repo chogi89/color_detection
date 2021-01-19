@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
 		imwrite("image_b.bmp", image_b);
 
 		Mat image_binary_g, image_binary_r;
-		inRange(image_lab, Scalar(0, 105, 0), Scalar(90, 110, 255), image_binary_g);
+		inRange(image_lab, Scalar(0, 100, 0), Scalar(90, 110, 255), image_binary_g);
 		inRange(image_lab, Scalar(0, 140, 140), Scalar(90, 255, 255), image_binary_r);
 
 		//To remove dots and To fill up dots from binary images
@@ -222,13 +222,13 @@ int main(int argc, char** argv) {
 						if (sqrt(2)*(1 - error_distance)*gr1_size < gr2_size && gr2_size < sqrt(2)*(1 + error_distance)*gr1_size) {
 							r_diagonal_1 = k;
 							diagonal_cnt1 = diagonal_cnt1 + 1;
-							cout << "diagonal" << endl;
+							cout << "diagonal1" << endl;
 						}
 
 					else if ((1 - error_distance)*gr1_size / sqrt(2) < gr2_size && gr2_size < (1 + error_distance)*gr1_size / sqrt(2)) {
 							r_diagonal_2[diagonal_cnt2] = k;
 							diagonal_cnt2 = diagonal_cnt2 + 1;
-							cout << "diagonal" << endl;
+							cout << "diagonal2" << endl;
 						}
 					}
 				}
@@ -313,16 +313,16 @@ int main(int argc, char** argv) {
 		cv::namedWindow("IMAGE", WINDOW_NORMAL); // Create a window for display.
 		cv::imshow("IMAGE", image_resized);
 		imwrite("image_detection.bmp", image_resized);
-		//cv::namedWindow("IMAGE_L", WINDOW_NORMAL); // Create a window for display.
-		//cv::imshow("IMAGE_L", image_l);
-		//cv::namedWindow("IMAGE_A", WINDOW_NORMAL); // Create a window for display.
-		//cv::imshow("IMAGE_A", image_a);
-		//cv::namedWindow("IMAGE_B", WINDOW_NORMAL); // Create a window for display.
-		//cv::imshow("IMAGE_B", image_b);
-		cv::namedWindow("IMAGE_G", WINDOW_NORMAL); // Create a window for display.
-		cv::imshow("IMAGE_G", image_binary_g);
-		cv::namedWindow("IMAGE_R", WINDOW_NORMAL); // Create a window for display.
-		cv::imshow("IMAGE_R", image_binary_r);
+		cv::namedWindow("IMAGE_L", WINDOW_NORMAL); // Create a window for display.
+		cv::imshow("IMAGE_L", image_l);
+		cv::namedWindow("IMAGE_A", WINDOW_NORMAL); // Create a window for display.
+		cv::imshow("IMAGE_A", image_a);
+		cv::namedWindow("IMAGE_B", WINDOW_NORMAL); // Create a window for display.
+		cv::imshow("IMAGE_B", image_b);
+		//cv::namedWindow("IMAGE_G", WINDOW_NORMAL); // Create a window for display.
+		//cv::imshow("IMAGE_G", image_binary_g);
+		//cv::namedWindow("IMAGE_R", WINDOW_NORMAL); // Create a window for display.
+		//cv::imshow("IMAGE_R", image_binary_r);
 
 	//	cv::waitKey(10); // Wait for a keystroke in the window
 	//}
