@@ -94,8 +94,8 @@ int main(int argc, char** argv) {
 		imwrite("image_b.bmp", image_b);
 
 		Mat image_binary_g, image_binary_r;
-		inRange(image_lab, Scalar(0, 100, 0), Scalar(90, 110, 255), image_binary_g);
-		inRange(image_lab, Scalar(0, 140, 140), Scalar(90, 255, 255), image_binary_r);
+		inRange(image_lab, Scalar(0, 0, 0), Scalar(255, 110, 255), image_binary_g);
+		inRange(image_lab, Scalar(0, 140, 0), Scalar(255, 255, 255), image_binary_r);
 
 		//To remove dots and To fill up dots from binary images
 		medianBlur(image_binary_r, image_binary_r, 3);
