@@ -16,9 +16,9 @@
 #include <opencv2/videoio/videoio.hpp>
 
 #define PI 			3.141592
-#define WIDTH		1024
-#define HEIGHT		768
-#define RESIZE		1
+#define WIDTH		2064
+#define HEIGHT		1544
+#define RESIZE		2
 
 using namespace cv;
 using namespace std;
@@ -28,14 +28,14 @@ int main(int argc, char** argv) {
 	double AspectRatio_g, AspectRatio_r, AreaRatio_g, AreaRatio_r;
 	double error_aspectratio = 0.65;
 	double error_arearatio = 0.31;
-	double error_radian = 4.5;
-	double error_distance = 0.1;
+	double error_radian = 15;
+	double error_distance = 0.2;
 	double mark[4][2] = { 0 };
 	double mark_temp_r[100][2] = { 0 };
 	double mark_temp_g[100][2] = { 0 };
 	int g_candidate[100] = { 0 };
 	int r_candidate[100] = { 0 };
-	bool mark_flag[4] = { false, false, false,false };
+	bool mark_flag[4] = {false, false, false, false};
 	int detected = 0;
 	Mat image, image_resized, image_hsv, image_lab;
 	int g_cnt, r_cnt;
@@ -48,13 +48,24 @@ int main(int argc, char** argv) {
 	int r_diagonal_2[2] = { 0 };
 	double gr1_size, gr2_size;
 
-	//for(int index=10; index<880; index++){
-	//	string str = to_string(index);
-	//	string str_dir = "./color_mark_1/image" + str + ".bmp";
-		string str_dir = "./color_mark_1/image_rect.bmp";
+	for(int index=4; index<693; index++){
+		string str = to_string(index);
+		string str_dir = "./image_210329_0/image" + str + ".bmp";
+		// string str_dir = "./image_210322_1/image5.bmp";
 		cout << str_dir << endl;
 		string imageName = str_dir;
-
+		
+		for(int mark_i = 0; mark_i<4; mark_i++){
+			mark_flag[mark_i] = false;
+			mark[mark_i][0] = 0;
+			mark[mark_i][1] = 0;
+		}
+		g_cnt = 0;
+		r_cnt = 0;
+		vertical_cnt = 0;
+		diagonal_cnt1 = 0;
+		diagonal_cnt2 = 0;
+		
 		if (argc > 1) {
 			imageName = argv[1];
 		}
@@ -69,6 +80,9 @@ int main(int argc, char** argv) {
 
 		medianBlur(image_resized, image_resized, 3);
 
+		imwrite("image_resized.bmp", image_resized);
+
+
 		cvtColor(image_resized, image_hsv, COLOR_BGR2HSV);
 		cvtColor(image_resized, image_lab, COLOR_BGR2Lab);
 
@@ -79,9 +93,9 @@ int main(int argc, char** argv) {
 		for (int row = 0; row < image_lab.rows; row++){
 			uchar* pointer_row = image_lab.ptr<uchar>(row);
 			for (int col = 0; col < image_lab.cols; col++){
-				l[row*WIDTH+col] = pointer_row[col * 3 + 0];
-				a[row*WIDTH+col] = pointer_row[col * 3 + 1];
-				b[row*WIDTH+col] = pointer_row[col * 3 + 2];
+				l[row*WIDTH/RESIZE+col] = pointer_row[col * 3 + 0];
+				a[row*WIDTH/RESIZE+col] = pointer_row[col * 3 + 1];
+				b[row*WIDTH/RESIZE+col] = pointer_row[col * 3 + 2];
 			}
 		}
 
@@ -93,17 +107,40 @@ int main(int argc, char** argv) {
 		imwrite("image_a.bmp", image_a);
 		imwrite("image_b.bmp", image_b);
 
+		//imwrite("image_lab_1.bmp", image_lab);
+
+		//medianBlur(image_lab, image_lab, 3);
+		//medianBlur(image_lab, image_lab, 3);
+		//medianBlur(image_lab, image_lab, 3);
+
+		//imwrite("image_lab_2.bmp", image_lab);
+
 		Mat image_binary_g, image_binary_r;
-		inRange(image_lab, Scalar(0, 0, 0), Scalar(255, 110, 255), image_binary_g);
-		inRange(image_lab, Scalar(0, 140, 0), Scalar(255, 255, 255), image_binary_r);
+		// inRange(image_lab, Scalar(0, 80, 0), Scalar(255, 115, 255), image_binary_g);
+		// inRange(image_lab, Scalar(30, 140, 130), Scalar(80, 180, 180), image_binary_r);
+
+		inRange(image_lab, Scalar(30, 80, 130), Scalar(80, 115, 180), image_binary_g);
+		inRange(image_lab, Scalar(30, 140, 130), Scalar(80, 180, 180), image_binary_r);
+
+		//medianBlur(image_a, image_a, 3);
+		//medianBlur(image_a, image_a, 3);
+		//medianBlur(image_a, image_a, 3);
+
+		//imwrite("image_a2.bmp", image_a);
+
+		imwrite("image_binary_g_1.bmp", image_binary_g);
+		imwrite("image_binary_r_1.bmp", image_binary_r);
 
 		//To remove dots and To fill up dots from binary images
-		medianBlur(image_binary_r, image_binary_r, 3);
-		medianBlur(image_binary_r, image_binary_r, 3);
-		medianBlur(image_binary_r, image_binary_r, 3);
 		medianBlur(image_binary_g, image_binary_g, 3);
 		medianBlur(image_binary_g, image_binary_g, 3);
 		medianBlur(image_binary_g, image_binary_g, 3);
+		medianBlur(image_binary_r, image_binary_r, 3);
+		medianBlur(image_binary_r, image_binary_r, 3);
+		medianBlur(image_binary_r, image_binary_r, 3);
+
+		// imwrite("image_binary_g_2.bmp", image_binary_g);
+		// imwrite("image_binary_r_2.bmp", image_binary_r);
 
 		// finde contours at bianry image
 		vector<vector<Point>> contours_r, contours_g;
@@ -113,17 +150,21 @@ int main(int argc, char** argv) {
 		vector<Rect> boundRect_g(contours_g.size()), boundRect_r(contours_r.size());
 		vector<Moments> mu_g(contours_g.size()), mu_r(contours_r.size());
 
-		Scalar color = Scalar(0, 255, 0);
+		Scalar color = Scalar(0, 255, 255);
 		Mat drawing_g = Mat::zeros(image_binary_g.size(), CV_8UC3);
 		Mat drawing_r = Mat::zeros(image_binary_r.size(), CV_8UC3);
 		for (int i = 0; i < contours_g.size(); i++)
 		{
-			drawContours(drawing_g, contours_g, i, color, 1, 8, hierarchy_g, 0, Point());
+			drawContours(drawing_g, contours_g, i, color, 5, 8, hierarchy_g, 0, Point());
 		}
 		for (int i = 0; i < contours_r.size(); i++)
 		{
-			drawContours(drawing_r, contours_r, i, color, 1, 8, hierarchy_r, 0, Point());
+			drawContours(drawing_r, contours_r, i, color, 5, 8, hierarchy_r, 0, Point());
 		}
+
+		imwrite("image_binary_g_3.bmp", drawing_g);
+		imwrite("image_binary_r_3.bmp", drawing_r);
+
 		//cv::namedWindow("drawing_r", WINDOW_NORMAL); // Create a window for display.
 		//cv::imshow("drawing_r", drawing_r);                // Show our image inside it.
 		//cv::namedWindow("drawing_g", WINDOW_NORMAL); // Create a window for display.
@@ -215,20 +256,20 @@ int main(int argc, char** argv) {
 						if ((1 - error_distance)*gr1_size < gr2_size && gr2_size < (1 + error_distance)*gr1_size) {
 							r_vertical = k;
 							vertical_cnt = vertical_cnt + 1;
-							cout << "vertical" << endl;
+							//cout << "vertical" << endl;
 						}
 					}
 					else if (45 - error_radian < radian && radian < 45 + error_radian) {
 						if (sqrt(2)*(1 - error_distance)*gr1_size < gr2_size && gr2_size < sqrt(2)*(1 + error_distance)*gr1_size) {
 							r_diagonal_1 = k;
 							diagonal_cnt1 = diagonal_cnt1 + 1;
-							cout << "diagonal1" << endl;
+							//cout << "diagonal1" << endl;
 						}
 
 					else if ((1 - error_distance)*gr1_size / sqrt(2) < gr2_size && gr2_size < (1 + error_distance)*gr1_size / sqrt(2)) {
 							r_diagonal_2[diagonal_cnt2] = k;
 							diagonal_cnt2 = diagonal_cnt2 + 1;
-							cout << "diagonal2" << endl;
+							//cout << "diagonal2" << endl;
 						}
 					}
 				}
@@ -267,32 +308,35 @@ int main(int argc, char** argv) {
 						}
 						
 				}
-
-
+				
 				//check length of side of squre and average LED diameter. (using non-change distance 3m(between led) and 0.2m(led diameter))
-				if (detected == 1) {
-					double area = contourArea(contours_g[g1]) + contourArea(contours_r[r1]) + contourArea(contours_r[r2]) + contourArea(contours_r[r3]);
-					double distance_ratio_cal = sqrt(2)*132 * pow(area, -0.822);
-					double distance_ratio;
-					if (gr1_size < gr2_size)
-						distance_ratio = gr2_size / area;
-					else
-						distance_ratio = gr1_size / area;
-					cout << "distance_ratio_cal: "<<distance_ratio_cal << endl;
-					cout << "DISTANCE RATIO ERROR: " << distance_ratio << endl;
-					cout << "AREA: " << area << endl;
-					if (distance_ratio > distance_ratio_cal*2 || distance_ratio < distance_ratio_cal*0.5) {
-						//detected = 0;
-					}
-				}
+				// if (detected == 1) {
+				// 	double area = contourArea(contours_g[g1]) + contourArea(contours_r[r1]) + contourArea(contours_r[r2]) + contourArea(contours_r[r3]);
+				// 	double distance_ratio_cal = sqrt(2)*132 * pow(area, -0.822);
+				// 	double distance_ratio;
+				// 	if (gr1_size < gr2_size)
+				// 		distance_ratio = gr2_size / area;
+				// 	else
+				// 		distance_ratio = gr1_size / area;
+				// 	cout << "distance_ratio_cal: "<<distance_ratio_cal << endl;
+				// 	cout << "DISTANCE RATIO ERROR: " << distance_ratio << endl;
+				// 	cout << "AREA: " << area << endl;
+				// 	if (distance_ratio > distance_ratio_cal*2 || distance_ratio < distance_ratio_cal*0.5) {
+				// 		//detected = 0;
+				// 	}
+				// }
 
 				// check numbering is counterclockwise. if not, change 1 and 3.
-				if (((mark_center[0] - mark[0][0])*(mark[0][1] - mark[3][1]) - (mark[0][1] - mark_center[1])*(mark[3][0] - mark[0][0])) < 0) {
+				// if( ((mark_center[0]-mark[0][0])*(mark[0][1]-mark[3][1]) - (mark_center[1]-mark[0][1])*(mark[0][0]-mark[3][0])) < 0) {
+				if( ((mark[1][0]-mark[0][0])*(mark[0][1]-mark[3][1]) - (mark[1][1]-mark[0][1])*(mark[0][0]-mark[3][0])) < 0) {
+					cout << "CCW" << endl;
 					double temp[2] = { mark[1][0],mark[1][1] };
 					mark[1][0] = mark[3][0];
 					mark[1][1] = mark[3][1];
 					mark[3][0] = temp[0];
 					mark[3][1] = temp[1];
+				}else{
+					cout << "CW" << endl;
 				}
 				if (detected == 1) {
 					for (int i = 0; i < 4; i++) {
@@ -310,22 +354,24 @@ int main(int argc, char** argv) {
 		if (detected != 1)
 			std::cout << "detect fail" << endl;
 
+		cout << "------------------------------------" << endl;
+
 		cv::namedWindow("IMAGE", WINDOW_NORMAL); // Create a window for display.
 		cv::imshow("IMAGE", image_resized);
-		imwrite("image_detection.bmp", image_resized);
-		cv::namedWindow("IMAGE_L", WINDOW_NORMAL); // Create a window for display.
-		cv::imshow("IMAGE_L", image_l);
-		cv::namedWindow("IMAGE_A", WINDOW_NORMAL); // Create a window for display.
-		cv::imshow("IMAGE_A", image_a);
-		cv::namedWindow("IMAGE_B", WINDOW_NORMAL); // Create a window for display.
-		cv::imshow("IMAGE_B", image_b);
+		// imwrite("image_detection.bmp", image_resized);
+		// cv::namedWindow("IMAGE_L", WINDOW_NORMAL); // Create a window for display.
+		// cv::imshow("IMAGE_L", image_l);
+		// cv::namedWindow("IMAGE_A", WINDOW_NORMAL); // Create a window for display.
+		// cv::imshow("IMAGE_A", image_a);
+		// cv::namedWindow("IMAGE_B", WINDOW_NORMAL); // Create a window for display.
+		// cv::imshow("IMAGE_B", image_b);
 		//cv::namedWindow("IMAGE_G", WINDOW_NORMAL); // Create a window for display.
 		//cv::imshow("IMAGE_G", image_binary_g);
 		//cv::namedWindow("IMAGE_R", WINDOW_NORMAL); // Create a window for display.
 		//cv::imshow("IMAGE_R", image_binary_r);
 
-	//	cv::waitKey(10); // Wait for a keystroke in the window
-	//}
+		cv::waitKey(100); // Wait for a keystroke in the window
+	}
 	
 	cv::waitKey(0); // Wait for a keystroke in the window
 
