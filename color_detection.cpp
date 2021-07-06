@@ -16,9 +16,10 @@
 #include <opencv2/videoio/videoio.hpp>
 
 #define PI 			3.141592
-#define WIDTH		2064
-#define HEIGHT		1544
-#define RESIZE		2
+#define WIDTH		2048
+#define HEIGHT		1536
+#define RESIZE		1
+#define SIZE_CANDIDATE	500
 
 using namespace cv;
 using namespace std;
@@ -31,10 +32,10 @@ int main(int argc, char** argv) {
 	double error_radian = 15;
 	double error_distance = 0.2;
 	double mark[4][2] = { 0 };
-	double mark_temp_r[100][2] = { 0 };
-	double mark_temp_g[100][2] = { 0 };
-	int g_candidate[100] = { 0 };
-	int r_candidate[100] = { 0 };
+	double mark_temp_r[SIZE_CANDIDATE][2] = { 0 };
+	double mark_temp_g[SIZE_CANDIDATE][2] = { 0 };
+	int g_candidate[SIZE_CANDIDATE] = { 0 };
+	int r_candidate[SIZE_CANDIDATE] = { 0 };
 	bool mark_flag[4] = {false, false, false, false};
 	int detected = 0;
 	Mat image, image_resized, image_hsv, image_lab;
@@ -48,12 +49,13 @@ int main(int argc, char** argv) {
 	int r_diagonal_2[2] = { 0 };
 	double gr1_size, gr2_size;
 
-	for(int index=4; index<693; index++){
-		string str = to_string(index);
-		string str_dir = "./image_210329_0/image" + str + ".bmp";
-		// string str_dir = "./image_210322_1/image5.bmp";
+	// for(int index=4; index<693; index++){
+		// string str = to_string(index);
+		// string str_dir = "./image_210329_0/image" + str + ".bmp";
+		string str_dir = "./image7.bmp";
 		cout << str_dir << endl;
 		string imageName = str_dir;
+
 		
 		for(int mark_i = 0; mark_i<4; mark_i++){
 			mark_flag[mark_i] = false;
@@ -75,7 +77,7 @@ int main(int argc, char** argv) {
 			return -1;
 		}
 
-
+		// resize(image, image_resized, Size(WIDTH, HEIGHT), INTER_NEAREST);
 		resize(image, image_resized, Size(WIDTH / RESIZE, HEIGHT / RESIZE), INTER_NEAREST);
 
 		medianBlur(image_resized, image_resized, 3);
@@ -86,26 +88,26 @@ int main(int argc, char** argv) {
 		cvtColor(image_resized, image_hsv, COLOR_BGR2HSV);
 		cvtColor(image_resized, image_lab, COLOR_BGR2Lab);
 
-		uchar l[HEIGHT*WIDTH/RESIZE];
-		uchar a[HEIGHT*WIDTH/RESIZE];
-		uchar b[HEIGHT*WIDTH/RESIZE];
+		// uchar l[(HEIGHT/RESIZE)*(WIDTH/RESIZE)];
+		// uchar a[(HEIGHT/RESIZE)*(WIDTH/RESIZE)];
+		// uchar b[(HEIGHT/RESIZE)*(WIDTH/RESIZE)];
 
-		for (int row = 0; row < image_lab.rows; row++){
-			uchar* pointer_row = image_lab.ptr<uchar>(row);
-			for (int col = 0; col < image_lab.cols; col++){
-				l[row*WIDTH/RESIZE+col] = pointer_row[col * 3 + 0];
-				a[row*WIDTH/RESIZE+col] = pointer_row[col * 3 + 1];
-				b[row*WIDTH/RESIZE+col] = pointer_row[col * 3 + 2];
-			}
-		}
+		// for (int row = 0; row < image_lab.rows; row++){
+		// 	uchar* pointer_row = image_lab.ptr<uchar>(row);
+		// 	for (int col = 0; col < image_lab.cols; col++){
+		// 		l[row*WIDTH/RESIZE+col] = pointer_row[col * 3 + 0];
+		// 		a[row*WIDTH/RESIZE+col] = pointer_row[col * 3 + 1];
+		// 		b[row*WIDTH/RESIZE+col] = pointer_row[col * 3 + 2];
+		// 	}
+		// }
 
-		Mat image_l = Mat(HEIGHT/RESIZE,WIDTH/RESIZE,CV_8UC1,l);
-		Mat image_a = Mat(HEIGHT/RESIZE,WIDTH/RESIZE,CV_8UC1,a);
-		Mat image_b = Mat(HEIGHT/RESIZE,WIDTH/RESIZE,CV_8UC1,b);
+		// Mat image_l = Mat(HEIGHT/RESIZE,WIDTH/RESIZE,CV_8UC1,l);
+		// Mat image_a = Mat(HEIGHT/RESIZE,WIDTH/RESIZE,CV_8UC1,a);
+		// Mat image_b = Mat(HEIGHT/RESIZE,WIDTH/RESIZE,CV_8UC1,b);
 
-		imwrite("image_l.bmp", image_l);
-		imwrite("image_a.bmp", image_a);
-		imwrite("image_b.bmp", image_b);
+		// imwrite("image_l.bmp", image_l);
+		// imwrite("image_a.bmp", image_a);
+		// imwrite("image_b.bmp", image_b);
 
 		//imwrite("image_lab_1.bmp", image_lab);
 
@@ -118,9 +120,15 @@ int main(int argc, char** argv) {
 		Mat image_binary_g, image_binary_r;
 		// inRange(image_lab, Scalar(0, 80, 0), Scalar(255, 115, 255), image_binary_g);
 		// inRange(image_lab, Scalar(30, 140, 130), Scalar(80, 180, 180), image_binary_r);
+		
+		// inRange(image_lab, Scalar(30, 80, 130), Scalar(80, 115, 180), image_binary_g);
+    	// inRange(image_lab, Scalar(30, 140, 130), Scalar(80, 180, 180), image_binary_r);
 
-		inRange(image_lab, Scalar(30, 80, 130), Scalar(80, 115, 180), image_binary_g);
-		inRange(image_lab, Scalar(30, 140, 130), Scalar(80, 180, 180), image_binary_r);
+		inRange(image_lab, Scalar(0, 0, 0), Scalar(255, 110, 255), image_binary_g);
+    	inRange(image_lab, Scalar(0, 140, 0), Scalar(255, 255, 255), image_binary_r);
+
+		// inRange(image_lab, Scalar(215, 35, 200), Scalar(235, 45, 220), image_binary_g);
+		// inRange(image_lab, Scalar(125, 200, 185), Scalar(145, 220, 205), image_binary_r);
 
 		//medianBlur(image_a, image_a, 3);
 		//medianBlur(image_a, image_a, 3);
@@ -149,6 +157,7 @@ int main(int argc, char** argv) {
 		findContours(image_binary_r, contours_r, hierarchy_r, 0, 4, Point());
 		vector<Rect> boundRect_g(contours_g.size()), boundRect_r(contours_r.size());
 		vector<Moments> mu_g(contours_g.size()), mu_r(contours_r.size());
+		cout << contours_g.size() << ", " << contours_r.size() << endl;
 
 		Scalar color = Scalar(0, 255, 255);
 		Mat drawing_g = Mat::zeros(image_binary_g.size(), CV_8UC3);
@@ -175,7 +184,7 @@ int main(int argc, char** argv) {
 		g_cnt = 0;
 
 		//std::cout << "   #         (x,y)            h        w        Area       AspectRatio     AreaRatio" << endl;
-
+		
 		for (int i = 0; i < contours_g.size(); i++) {
 			boundRect_g[i] = boundingRect(Mat(contours_g[i]));
 			AspectRatio_g = (double)boundRect_g[i].height / boundRect_g[i].width;
@@ -371,7 +380,7 @@ int main(int argc, char** argv) {
 		//cv::imshow("IMAGE_R", image_binary_r);
 
 		cv::waitKey(100); // Wait for a keystroke in the window
-	}
+	// }
 	
 	cv::waitKey(0); // Wait for a keystroke in the window
 
